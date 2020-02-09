@@ -1,6 +1,28 @@
 video_path=$1
 video_duration=$2
 
+clean_temp_folder=true
+name_video_path=$(basename $video_path)
+square_version_path="temp/square_$name_video_path"
+square_version_with_timer_path="temp/square_version_with_timer_$name_video_path"
+final_video_path="stage/final_$name_video_path"
+echo $square_version_with_timer_path
+
+error_output() {
+  echo 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  echo "ERROR! ==> $1";
+  echo 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  exit 1;
+}
+
+check_error() {
+  if [ $? != 0 ]; then
+    error_output "Erro ao renderizar video..."
+    exit 1;
+  fi
+}
+
+
 video_input_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $video_path)
 
 if [ -z "$video_duration" ] || (( $(echo "$video_duration > $video_input_duration" |bc -l) )); then
@@ -9,8 +31,6 @@ fi
 video_duration_cmd="-t $video_duration"
 echo "Video duration is: $video_input_duration" 
 echo "Desired Video duration ouput: $video_duration"
-
-exit;
 
 height_video_original=$(ffprobe -v error -show_entries stream=height -of csv=p=0:s=x $video_path)
 width_video_original=$(ffprobe -v error -show_entries stream=width -of csv=p=0:s=x $video_path)
@@ -52,20 +72,26 @@ resolucao="scale=iw*min($width/iw\,$height/ih):ih*min($width/iw\,$height/ih), pa
 #ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -vframes 1  -y xdg-open output.jpg
 
 ##Extrair Video Quadrado
-ffmpeg -i $video_path $video_duration_cmd -filter_complex "$resolucao" -c:a copy output_quadrado.mp4 -y
-
+ffmpeg -i $video_path $video_duration_cmd -filter_complex "$resolucao" -c:a copy $square_version_path -y
+check_error
 ##ESSE AQUI GERA BACANA, SÓ NÃO ANIMA O TIMER DO PROGRESSO
 #ffmpeg -i output_quadrado.mp4 -t 1 -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy output.mp4 -y
 #ffmpeg -i output_quadrado.mp4  -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_video_frames \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,$resolucao" -c:a copy output.mp4 -y
 
 #ESSE AQUI É PRA TENTAR ADICIONAR A LINHA DO TIMER
-ffmpeg -i  output_quadrado.mp4 $video_duration_cmd -f lavfi -i "color=$box_timer_color:size=1080x1080" \
+ffmpeg -i  $square_version_path $video_duration_cmd -f lavfi -i "color=$box_timer_color:size=1080x1080" \
 -t $video_duration -filter_complex "[0:v]setsar=sar=1/1[saida_video_0];[saida_video_0][1:v]overlay=-(main_w-(n/$total_video_frames)*main_w):main_w-$height_box-$height_linha_timer[out]" \
--map [out] -map 0:a output_timer.mp4 -y
+-map [out] -map 0:a $square_version_with_timer_path -y
+check_error
 
-ffmpeg -i output_timer.mp4  -filter_complex "$box_topo,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_video_frames \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy output_final.mp4 -y
+ffmpeg -i $square_version_with_timer_path  -filter_complex "$box_topo,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_video_frames \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy $final_video_path -y
+check_error
 
-ffplay output_final.mp4
+if [ $clean_temp_folder = true ]; then
+  printf 'Cleaning temp folder: '
+  rm temp/*.mp4
+  rm temp/*.jpg
+  printf 'OK'
+fi
 
-#ffprobe -i output.mp4
-echo  $height_box | bc
+ffplay $final_video_path
