@@ -1,12 +1,10 @@
 video_path=$1
 video_duration=$2
-
 clean_temp_folder=true
 name_video_path=$(basename $video_path)
 square_version_path="temp/square_$name_video_path"
 square_version_with_timer_path="temp/square_version_with_timer_$name_video_path"
 final_video_path="stage/final_$name_video_path"
-echo $square_version_with_timer_path
 
 error_output() {
   echo 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
@@ -22,11 +20,27 @@ check_error() {
   fi
 }
 
+
+load_input_file_header_text() {
+  #Load input text to headline
+  echo $1
+  if [ -z "$1" ]; then
+    echo 'ERROR: Please, inform a input file path with variables header_text and bottom_text'
+    exit 1;    
+  else
+    source $1
+  fi
+}
+
 video_input_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $video_path)
 
-if [ -z "$video_duration" ] || (( $(echo "$video_duration > $video_input_duration" |bc -l) )); then
+if [ -z "$video_duration" ] || [ "$video_duration" == 0 ] || (( $(echo "$video_duration > $video_input_duration" |bc -l) )); then
   video_duration=$video_input_duration    
 fi
+
+
+
+
 
 video_duration_cmd="-t $video_duration"
 echo "Video duration is: $video_input_duration" 
@@ -46,10 +60,9 @@ printf 'Recovering total video frames: '
 total_frames_video=$(ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 $square_version_path)
 printf 'OK\n'
 
+load_input_file_header_text $3
 
 #TEXTO MAIOR NO TOPO E NO RODAPÉ CENTRALIZADO
-texto_topo="VOCÊ QUER SE TORNAR UM ESPECIALISTA AWS"
-texto_rodape="ASSISTA O VÍDEO ATÉ O FIM"
 height_box="(($width_original_video-$height_original_video)*9/16)/2"
 height_linha_timer=8
 cor_linha_timer=white
@@ -64,16 +77,16 @@ box_timer_color="black"
 box_rodape="drawbox=x=0:y=ih-$height_box:h=$height_box:color=$backgroud_color:thickness=max"
 #resolucao="scale=iw:iw,pad=600:600:(ow-iw)/2:(oh-ih)/2"
 
-#ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape" -c:a copy output.mp4 -y
+#ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape" -c:a copy output.mp4 -y
 
 ##Extrair somente imagem
-#ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -vframes 1  -y xdg-open output.jpg
+#ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -vframes 1  -y xdg-open output.jpg
 
 
 
 ##ESSE AQUI GERA BACANA, SÓ NÃO ANIMA O TIMER DO PROGRESSO
-#ffmpeg -i output_quadrado.mp4 -t 1 -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy output.mp4 -y
-#ffmpeg -i output_quadrado.mp4  -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,$resolucao" -c:a copy output.mp4 -y
+#ffmpeg -i output_quadrado.mp4 -t 1 -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy output.mp4 -y
+#ffmpeg -i output_quadrado.mp4  -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,$resolucao" -c:a copy output.mp4 -y
 
 #ESSE AQUI É PRA TENTAR ADICIONAR A LINHA DO TIMER
 ffmpeg -i  $square_version_path $video_duration_cmd -f lavfi -i "color=$box_timer_color:size=1080x1080" \
@@ -81,7 +94,7 @@ ffmpeg -i  $square_version_path $video_duration_cmd -f lavfi -i "color=$box_time
 -map [out] -map 0:a $square_version_with_timer_path -y
 check_error
 
-ffmpeg -i $square_version_with_timer_path  -filter_complex "$box_topo,$box_rodape,drawtext=text='$texto_topo':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$texto_rodape':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy $final_video_path -y
+ffmpeg -i $square_version_with_timer_path  -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy $final_video_path -y
 check_error
 
 if [ $clean_temp_folder = true ]; then
