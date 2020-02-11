@@ -1,0 +1,2 @@
+header_text="SAMPLE TEXT ON THE TOP"
+bottom_text="SAMPLE TEXT ON THE BOTTOM"
