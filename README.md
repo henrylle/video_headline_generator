@@ -9,7 +9,8 @@ Important Informations
 # Request Example
 
 + Parameter 1: Video_Path
-+ Parameter 2: Video_Duration to output. If original video duration is longer, will be cut.
++ Parameter 2: Video_Duration to output. If original video duration is longer, will be cut. To render entire video set 0 value.
++ Parameter 3: Input text for headline. Head and botton texts. Both are required.
 ``` 
 ./scripts.sh video.mp4 15
 ```
