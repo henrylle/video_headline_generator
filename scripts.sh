@@ -6,11 +6,6 @@ square_version_path="temp/square_$name_video_path"
 square_version_with_timer_path="temp/square_version_with_timer_$name_video_path"
 final_video_path="stage/final_$name_video_path"
 
-log_level_ffmpeg="-loglevel panic"
-if [ ! -z $VERBOSE] && [ $VERBOSE == "true" ]; then
-  log_level_ffmpeg=""
-fi
-
 error_output() {
   echo 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
   echo "ERROR! ==> $1";
@@ -36,8 +31,7 @@ spinner(){
   done
 }
 
-load_input_file_header_text() {
-  #Load input text to headline  
+load_input_file_header_text() {  
   if [ -z "$1" ]; then
     echo 'ERROR: Please, inform a input file path with variables header_text and bottom_text'
     exit 1;    
@@ -45,6 +39,14 @@ load_input_file_header_text() {
     source $1
   fi
 }
+
+
+log_level_ffmpeg="-loglevel panic"
+if [ ! -z $VERBOSE ] && [ $VERBOSE == "true" ]; then
+  log_level_ffmpeg=""
+fi
+check_error
+
 
 video_input_duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $video_path)
 
@@ -54,7 +56,7 @@ fi
 
 
 video_duration_cmd="-t $video_duration"
-if [ ! -z $VERBOSE] && [ $VERBOSE == "true" ]; then
+if [ ! -z $VERBOSE ] && [ $VERBOSE == "true" ]; then
   echo "Video duration is: $video_input_duration" 
   echo "Desired Video duration ouput: $video_duration"
 fi
@@ -69,7 +71,7 @@ resolucao="scale=iw*min($width/iw\,$height/ih):ih*min($width/iw\,$height/ih), pa
 
 
 ##Extrair Video Quadrado
-if [ $PREVIEW != true ]; then
+if [ $PREVIEW != "true" ]; then
   printf '1/4: Extracting square video: '
   ffmpeg -i $video_path $video_duration_cmd $log_level_ffmpeg -filter_complex "$resolucao" -c:a copy $square_version_path -y
   check_error
@@ -131,8 +133,8 @@ if [ $clean_temp_folder = true ]; then
 fi
 printf 'Finish!\n'
 
-if [ $PREVIEW == true ]; then
-  ffplay $video_path -vf "$resolucao, $box_topo,$box_rodape, $headline, $bottomline"
+if [ $PREVIEW == "true" ]; then  
+  ffplay $video_path $log_level_ffmpeg -vf "setpts=2.0*N/FRAME_RATE/TB, $resolucao, $box_topo,$box_rodape, $headline, $bottomline"
 else
   ffplay $final_video_path
 fi

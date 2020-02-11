@@ -19,5 +19,5 @@ Important Informations
 
 
 ``` 
-./scripts.sh stage/video.mp4 15 stage/input_headline_text.txt PREVIEW=true VERBOSE=false
+PREVIEW=true VERBOSE=false ./scripts.sh stage/video.mp4 15 stage/input_headline_text.txt
 ```
