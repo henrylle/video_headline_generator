@@ -53,9 +53,6 @@ if [ -z "$video_duration" ] || [ "$video_duration" == 0 ] || (( $(echo "$video_d
 fi
 
 
-
-
-
 video_duration_cmd="-t $video_duration"
 if [ ! -z $VERBOSE] && [ $VERBOSE == "true" ]; then
   echo "Video duration is: $video_input_duration" 
@@ -92,20 +89,20 @@ centralizar_horizontal="x=(w-text_w)/2"
 
 centralizar_vertical_topo="y=($height_box-text_h)/2"
 centralizar_vertical_rodape="y=h-($height_box+text_h)/2"
+
 backgroud_color="yellow"
 box_topo="drawbox=x=0:y=0:h=$height_box:color=$backgroud_color:thickness=max"
-#box_timer="drawbox=x=0:y=ih-$height_box-$height_linha_timer:h=$height_linha_timer:w=t/8:color=$cor_linha_timer:thickness=max"
+
 box_timer_color="black"
 box_rodape="drawbox=x=0:y=ih-$height_box:h=$height_box:color=$backgroud_color:thickness=max"
-#resolucao="scale=iw:iw,pad=600:600:(ow-iw)/2:(oh-ih)/2"
+
+headline="drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9"
+bottomline="drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape"
 
 #ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape" -c:a copy output.mp4 -y
 
 ##Extrair somente imagem
 #ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -vframes 1  -y xdg-open output.jpg
-
-#ffplay $video_path -vf "$resolucao, drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9"
-#exit;
 
 ##ESSE AQUI GERA BACANA, SÓ NÃO ANIMA O TIMER DO PROGRESSO
 #ffmpeg -i output_quadrado.mp4 -t 1 -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy output.mp4 -y
@@ -121,10 +118,11 @@ if [ $PREVIEW != true ]; then
   printf 'OK\n'
   
   printf '4/4: Adding headline and box-color: '
-  ffmpeg -i $square_version_with_timer_path $log_level_ffmpeg  -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy $final_video_path -y
+  ffmpeg -i $square_version_with_timer_path $log_level_ffmpeg  -filter_complex "$box_topo,$box_rodape,$headline,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,$bottomline,$resolucao" -c:a copy $final_video_path -y
   check_error
   printf 'OK\n'
 fi
+
 if [ $clean_temp_folder = true ]; then
   printf 'Cleaning temp folder: '
   rm -f temp/*.mp4
@@ -133,4 +131,8 @@ if [ $clean_temp_folder = true ]; then
 fi
 printf 'Finish!\n'
 
-ffplay $final_video_path
+if [ $PREVIEW == true ]; then
+  ffplay $video_path -vf "$resolucao, $box_topo,$box_rodape, $headline, $bottomline"
+else
+  ffplay $final_video_path
+fi
