@@ -95,12 +95,15 @@ backgroud_color="white"
 box_timer_color="black"
 font_color="black"
 font_size=56
+font_style="fontsize=$font_size:fontcolor=$font_color@0.9"
 
 if [ $THEME="AUSTIN" ]; then
   backgroud_color="yellow"
   box_timer_color="black"
   font_color="black"
-  font_size=50
+  font_size=56
+  font_file=fonts/roboto/RobotoCondensed-Bold.ttf  
+  font_style="fontsize=$font_size:fontcolor=$font_color@0.9:fontfile=$font_file"
 fi
 
 
@@ -109,8 +112,8 @@ box_topo="drawbox=x=0:y=0:h=$height_box:color=$backgroud_color:thickness=max"
 
 box_rodape="drawbox=x=0:y=ih-$height_box:h=$height_box:color=$backgroud_color:thickness=max"
 
-headline="drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=$font_size:box=1:boxcolor=$backgroud_color:fontcolor=$font_color@0.9"
-bottomline="drawtext=text='$bottom_text':y=1024:fontsize=$font_size:box=1:boxcolor=$backgroud_color:fontcolor=$font_color@0.9:$centralizar_horizontal:$centralizar_vertical_rodape"
+headline="drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:$font_style:box=1:boxcolor=$backgroud_color"
+bottomline="drawtext=text='$bottom_text':y=1024:$font_style:box=1:boxcolor=$backgroud_color:$centralizar_horizontal:$centralizar_vertical_rodape"
 
 #ESSE AQUI É PRA TENTAR ADICIONAR A LINHA DO TIMER
 if [ $PREVIEW != true ]; then
@@ -143,7 +146,7 @@ fi
 printf 'Finish!\n'
 
 if [ $PREVIEW == "true" ]; then  
-  ffplay $video_path $log_level_ffmpeg -vf "setpts=2.0*N/FRAME_RATE/TB, $resolucao, $box_topo,$box_rodape, $headline, $bottomline"
+  ffplay $video_path $log_level_ffmpeg -vf "$resolucao, $box_topo,$box_rodape, $headline, $bottomline"
 else
   ffplay $final_video_path
 fi
