@@ -91,23 +91,26 @@ centralizar_horizontal="x=(w-text_w)/2"
 centralizar_vertical_topo="y=($height_box-text_h)/2"
 centralizar_vertical_rodape="y=h-($height_box+text_h)/2"
 
-backgroud_color="yellow"
+backgroud_color="white"
+box_timer_color="black"
+font_color="black"
+font_size=56
+
+if [ $THEME="AUSTIN" ]; then
+  backgroud_color="yellow"
+  box_timer_color="black"
+  font_color="black"
+  font_size=50
+fi
+
+
 box_topo="drawbox=x=0:y=0:h=$height_box:color=$backgroud_color:thickness=max"
 
-box_timer_color="black"
+
 box_rodape="drawbox=x=0:y=ih-$height_box:h=$height_box:color=$backgroud_color:thickness=max"
 
-headline="drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9"
-bottomline="drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape"
-
-#ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=white:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape" -c:a copy output.mp4 -y
-
-##Extrair somente imagem
-#ffmpeg -i video.mp4 -t 1 -filter_complex "$box_topo,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -vframes 1  -y xdg-open output.jpg
-
-##ESSE AQUI GERA BACANA, SÓ NÃO ANIMA O TIMER DO PROGRESSO
-#ffmpeg -i output_quadrado.mp4 -t 1 -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9:$centralizar_horizontal:$centralizar_vertical_rodape,$resolucao" -c:a copy output.mp4 -y
-#ffmpeg -i output_quadrado.mp4  -filter_complex "$box_topo,$box_timer,$box_rodape,drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=56:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,$resolucao" -c:a copy output.mp4 -y
+headline="drawtext=text='$header_text':$centralizar_horizontal:$centralizar_vertical_topo:fontsize=$font_size:box=1:boxcolor=$backgroud_color:fontcolor=$font_color@0.9"
+bottomline="drawtext=text='$bottom_text':y=1024:fontsize=$font_size:box=1:boxcolor=$backgroud_color:fontcolor=$font_color@0.9:$centralizar_horizontal:$centralizar_vertical_rodape"
 
 #ESSE AQUI É PRA TENTAR ADICIONAR A LINHA DO TIMER
 if [ $PREVIEW != true ]; then
@@ -122,7 +125,7 @@ if [ $PREVIEW != true ]; then
   
   show_timer_and_percent_cmd=""
   if [ ! -z $SHOW_TIMER_AND_PERCENT_ON_BOTTOM ] && [ $SHOW_TIMER_AND_PERCENT_ON_BOTTOM == "true" ]; then
-    show_timer_and_percent_cmd=",drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9"
+    show_timer_and_percent_cmd=",drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=$font_color@0.9"
   fi
 
   printf '4/4: Adding headline and box-color: '

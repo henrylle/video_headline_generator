@@ -17,7 +17,19 @@ Important Informations
 + PREVIEW: If true, will render a preview for headline on video. If false or empty will render all steps. Default is false
 + VERBOSE: If true will render all output from ffmpeg and another logs. If false or empty will render minimal logs. Default is false
 + SHOW_TIMER_AND_PERCENT_ON_BOTTOM: If true will render percent video and duration on video bottom. Default is false
++ THEME: Concept to introduce possibility to choose a limited options for combine font-color, backgroud-color and timer-color. The default options is: DEFAULT
+++[DEFAULT]
++++backgroud_color="white"
++++box_timer_color="black"
++++font_color="black"
++++font_size=56
+++[AUSTIN]
++++backgroud_color="yellow"
++++box_timer_color="black"
++++font_color="black"
++++font_size=50
 
+ Options available: DEFAULT | AUSTIN.
 ``` 
 PREVIEW=true VERBOSE=false ./scripts.sh stage/video.mp4 15 stage/input_headline_text.txt
 ```
