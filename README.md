@@ -31,5 +31,5 @@ Important Informations
 
  Options available: DEFAULT | AUSTIN.
 ``` 
-PREVIEW=true VERBOSE=false ./scripts.sh stage/video.mp4 15 stage/input_headline_text.txt
+THEME=AUSTIN PREVIEW=false VERBOSE=false ./scripts.sh stage/video.mp4 15 stage/input_headline_text.txt
 ```
