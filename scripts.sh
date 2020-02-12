@@ -64,11 +64,9 @@ fi
 height_original_video=$(ffprobe -v error -show_entries stream=height -of csv=p=0:s=x $video_path)
 width_original_video=$(ffprobe -v error -show_entries stream=width -of csv=p=0:s=x $video_path)
 
-width="1080"
-height="1080"
-resolucao="scale=iw*min($width/iw\,$height/ih):ih*min($width/iw\,$height/ih), pad=$width:$height:($width-iw*min($width/iw\,$height/ih))/2:($height-ih*min($width/iw\,$height/ih))/2"
-
-
+width_new_video="1080"
+height_new_video="1080"
+resolucao="scale=iw*min($width_new_video/iw\,$height_new_video/ih):ih*min($width_new_video/iw\,$height_new_video/ih), pad=$width_new_video:$height_new_video:($width_new_video-iw*min($width_new_video/iw\,$height_new_video/ih))/2:($height_new_video-ih*min($width_new_video/iw\,$height_new_video/ih))/2"
 
 ##Extrair Video Quadrado
 if [ $PREVIEW != "true" ]; then
@@ -84,7 +82,8 @@ fi
 load_input_file_header_text $3
 
 #TEXTO MAIOR NO TOPO E NO RODAPÉ CENTRALIZADO
-height_box="(($width_original_video-$height_original_video)*9/16)/2"
+height_box="(($width_original_video-$height_new_video)*9/16)/2"
+
 height_linha_timer=8
 cor_linha_timer=white
 centralizar_horizontal="x=(w-text_w)/2"
