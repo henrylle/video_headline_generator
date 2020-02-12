@@ -41,7 +41,7 @@ load_input_file_header_text() {
 }
 
 
-log_level_ffmpeg="-loglevel panic"
+log_level_ffmpeg="-loglevel error"
 if [ ! -z $VERBOSE ] && [ $VERBOSE == "true" ]; then
   log_level_ffmpeg=""
 fi
@@ -112,15 +112,22 @@ bottomline="drawtext=text='$bottom_text':y=1024:fontsize=56:box=1:boxcolor=$back
 
 #ESSE AQUI É PRA TENTAR ADICIONAR A LINHA DO TIMER
 if [ $PREVIEW != true ]; then
+  overlay_config_cmd="-(main_w-(n/$total_frames_video)*main_w):main_w-$height_box-$height_linha_timer"
+  progress_animation_cmd="[0:v]setsar=sar=1/1[saida_video_0];[saida_video_0][1:v]overlay=$overlay_config_cmd[out]"
+  
   printf '3/4: Adding progress animation: '
   ffmpeg -i  $square_version_path $video_duration_cmd $log_level_ffmpeg -f lavfi -i "color=$box_timer_color:size=1080x1080" \
-  -t $video_duration -filter_complex "[0:v]setsar=sar=1/1[saida_video_0];[saida_video_0][1:v]overlay=-(main_w-(n/$total_frames_video)*main_w):main_w-$height_box-$height_linha_timer[out]" \
-  -map [out] -map 0:a $square_version_with_timer_path -y
+  -t $video_duration -filter_complex $progress_animation_cmd -map [out] -map 0:a $square_version_with_timer_path -y
   check_error
   printf 'OK\n'
   
+  show_timer_and_percent_cmd=""
+  if [ ! -z $SHOW_TIMER_AND_PERCENT_ON_BOTTOM ] && [ $SHOW_TIMER_AND_PERCENT_ON_BOTTOM == "true" ]; then
+    show_timer_and_percent_cmd=",drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9"
+  fi
+
   printf '4/4: Adding headline and box-color: '
-  ffmpeg -i $square_version_with_timer_path $log_level_ffmpeg  -filter_complex "$box_topo,$box_rodape,$headline,drawtext=text='Percentual\: %{eif\:n*100/$total_frames_video \:d}  Tempo\: %{eif\:t\:d}s':y=1024:x=w/1*mod(10\,1):fontsize=32:box=1:boxcolor=$backgroud_color:fontcolor=black@0.9,$bottomline,$resolucao" -c:a copy $final_video_path -y
+  ffmpeg -i $square_version_with_timer_path $log_level_ffmpeg  -filter_complex "$box_topo,$box_rodape,$headline,$bottomline,$resolucao $show_timer_and_percent_cmd" -c:a copy $final_video_path -y
   check_error
   printf 'OK\n'
 fi
