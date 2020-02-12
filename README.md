@@ -30,6 +30,8 @@ Important Informations
     * font_size=50
 
  Options available: DEFAULT | AUSTIN.
+
+Example Request:
 ``` 
 THEME=AUSTIN PREVIEW=false VERBOSE=false ./scripts.sh stage/video.mp4 15 stage/input_headline_text.txt
 ```
