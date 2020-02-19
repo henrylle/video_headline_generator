@@ -97,7 +97,7 @@ font_color="black"
 font_size=56
 font_style="fontsize=$font_size:fontcolor=$font_color@0.9"
 
-if [ $THEME="AUSTIN" ]; then
+if [ $THEME == "AUSTIN" ]; then
   backgroud_color="yellow"
   box_timer_color="black"
   font_color="black"
